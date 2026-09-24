@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recurring Payment Mandate Platform</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="page">
+    <header>
+        <div>
+            <p class="eyebrow">Payment Operations Simulation</p>
+            <h1>Recurring Payment Mandate Platform</h1>
+            <p class="subtitle">Mandate lifecycle, scheduled execution, retries, idempotency and auditability.</p>
+        </div>
+        <div class="header-meta">
+            <div><strong>FastAPI</strong> · SQLAlchemy · SQLite · APScheduler</div>
+            <div>Auto-refresh every 5 seconds</div>
+        </div>
+    </header>
+
+    <div id="message" class="message hidden"></div>
+
+    <section class="grid cards">
+        <div class="card"><div class="label">Active</div><div id="active" class="value">0</div></div>
+        <div class="card"><div class="label">Paused</div><div id="paused" class="value">0</div></div>
+        <div class="card"><div class="label">Cancelled</div><div id="cancelled" class="value">0</div></div>
+        <div class="card"><div class="label">Revenue</div><div id="revenue" class="value">0</div></div>
+        <div class="card"><div class="label">Transactions</div><div id="transactions" class="value">0</div></div>
+        <div class="card"><div class="label">Successful</div><div id="success" class="value">0</div></div>
+        <div class="card"><div class="label">Failed</div><div id="failed" class="value">0</div></div>
+        <div class="card"><div class="label">Success Rate</div><div id="successRate" class="value">0%</div></div>
+    </section>
+
+    <section class="grid panel" style="margin-bottom:18px;">
+        <div class="panel-inner">
+            <h2 class="panel-title">Create Mandate</h2>
+            <p class="panel-subtitle">New mandates start in ACTIVE state and are eligible for scheduled execution.</p>
+            <form id="createMandateForm">
+                <div>
+                    <label for="customerName">Customer</label>
+                    <input id="customerName" name="customer_name" placeholder="Customer name" required>
+                </div>
+                <div>
+                    <label for="merchantName">Merchant</label>
+                    <input id="merchantName" name="merchant_name" placeholder="Merchant name" required>
+                </div>
+                <div>
+                    <label for="amount">Amount</label>
+                    <input id="amount" name="amount" type="number" min="1" placeholder="1000" required>
+                </div>
+                <div>
+                    <label for="frequency">Frequency</label>
+                    <select id="frequency" name="frequency">
+                        <option value="DAILY">Daily</option>
+                        <option value="WEEKLY">Weekly</option>
+                        <option value="MONTHLY">Monthly</option>
+                    </select>
+                </div>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="grid split">
+        <div class="panel">
+            <div class="panel-inner">
+                <h2 class="panel-title">Successful Revenue by Merchant</h2>
+                <p class="panel-subtitle">Aggregated from successful transactions.</p>
+            </div>
+            <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="panel">
+            <div class="panel-inner">
+                <h2 class="panel-title">Payment Outcomes</h2>
+                <p class="panel-subtitle">Current success/failure distribution.</p>
+            </div>
+            <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+        </div>
+    </section>
+
+    <section class="panel table-panel">
+        <div class="table-header"><h2>Mandates</h2><span>Lifecycle controls and scheduled execution</span></div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th><th>Customer</th><th>Merchant</th><th>Amount</th><th>Frequency</th>
+                    <th>Status</th><th>Next Execution</th><th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="mandateTable"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel table-panel">
+        <div class="table-header"><h2>Recent Transactions</h2><span>Latest 100 records, newest first</span></div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                <tr>
+                    <th>Transaction</th><th>Mandate</th><th>Amount</th><th>Status</th>
+                    <th>Failure Reason</th><th>Retry Count</th><th>Created</th><th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="transactionTable"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel table-panel">
+        <div class="table-header"><h2>Merchant Analytics</h2><span>Success, failure and revenue breakdown</span></div>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>Merchant</th><th>Revenue</th><th>Success</th><th>Failed</th><th>Total</th><th>Success Rate</th></tr></thead>
+                <tbody id="merchantTable"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel table-panel">
+        <div class="table-header"><h2>Audit Trail</h2><span>Latest operational events</span></div>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>Time</th><th>Entity</th><th>Entity ID</th><th>Action</th><th>Details</th></tr></thead>
+                <tbody id="auditTable"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/script.js"></script>
+</body>
+</html>

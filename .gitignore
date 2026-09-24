@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+
+# Local databases / runtime files
+*.db
+*.sqlite
+*.sqlite3
+
+# Test / tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / editor files
+.vscode/
+.idea/
+
+# Local environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project-local personal file
+protein table.xlsx
