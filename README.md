@@ -1,22 +1,33 @@
 # Recurring Payment Mandate Platform
 
+[![CI](https://github.com/RoycePlayzz/recurring-payment-mandate-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/RoycePlayzz/recurring-payment-mandate-platform/actions/workflows/ci.yml)
+
 A backend-focused payment operations simulation built with **Python, FastAPI, SQLAlchemy, SQLite, and APScheduler**.
 
-The project models the operational side of recurring payments: mandate lifecycle management, scheduled execution, transaction tracking, retries, idempotency, audit events, and merchant-level analytics.
+The project models recurring-payment operations end to end: mandate lifecycle management, scheduled execution, transaction tracking, bounded retries, idempotency, audit events, and merchant-level analytics.
 
-## Key Features
+## What it demonstrates
 
-- Create, pause, resume, and cancel recurring payment mandates
-- Execute scheduled payment attempts with a background scheduler
-- Persist mandates, transactions, and audit events with SQLAlchemy + SQLite
-- Generate unique transaction IDs for payment attempts
-- Protect payment execution with an `Idempotency-Key`
-- Track failed attempts and support bounded retries
-- Record operational events in a dedicated audit log
-- Aggregate success, failure, revenue, and success-rate metrics by merchant
-- Expose a REST API with FastAPI's OpenAPI/Swagger documentation
-- Provide a lightweight browser dashboard using Jinja2, vanilla JavaScript, and Chart.js
-- Validate request data at both the browser and API layers
+- REST API design with FastAPI and OpenAPI/Swagger
+- Persistent application state with SQLAlchemy and SQLite
+- Mandate lifecycle and state transitions
+- Scheduled background execution with APScheduler
+- Idempotent payment requests using an `Idempotency-Key`
+- Transaction IDs, failure handling, and bounded retries
+- Dedicated audit logging for operational events
+- Merchant-level success, failure, revenue, and success-rate metrics
+- Browser and API-layer request validation
+- Automated testing with pytest
+
+## Screenshots
+
+### Operations dashboard
+
+![Operations dashboard](docs/screenshots/dashboard.png)
+
+### API documentation
+
+![FastAPI Swagger documentation](docs/screenshots/api-docs.png)
 
 ## Architecture
 
@@ -33,7 +44,7 @@ flowchart LR
     SCH[APScheduler] --> E
 ```
 
-## Project Structure
+## Project structure
 
 ```text
 app/
@@ -55,13 +66,21 @@ templates/
 tests/
 ├── conftest.py
 └── test_payment_engine.py
+.github/
+└── workflows/
+    └── ci.yml
+docs/
+└── screenshots/
+    ├── dashboard.png
+    └── api-docs.png
 .gitignore
+.gitattributes
 LICENSE
 README.md
 requirements.txt
 ```
 
-## Main API Endpoints
+## API surface
 
 | Method | Endpoint | Purpose |
 |---|---|---|
@@ -80,11 +99,11 @@ requirements.txt
 | GET | `/merchant-analytics` | Merchant-level metrics |
 | GET | `/audit-logs` | Recent audit events |
 
-Interactive API documentation is available at `/docs` after starting the application.
+Interactive documentation is available at `http://127.0.0.1:8000/docs` when the application is running.
 
 ## Idempotency
 
-The payment execution endpoint accepts an optional `Idempotency-Key` header.
+The payment execution endpoint accepts an `Idempotency-Key` header. Reusing the same key returns the existing transaction instead of creating a second transaction record.
 
 ```text
 Request 1: Idempotency-Key = payment-123
@@ -98,22 +117,20 @@ Request 2: Idempotency-Key = payment-123
 Return the existing transaction
 ```
 
-This prevents the same logical request from creating multiple transaction records. Scheduled executions use a deterministic key based on the mandate and scheduled timestamp.
+Scheduled executions use a deterministic idempotency key derived from the mandate and scheduled timestamp.
 
-## Retry Model
+## Retry model
 
-A failed transaction can be retried up to three times after the original attempt. Each retry is stored as a separate transaction record and carries the incremented retry count.
+A failed transaction can be retried up to three times after the original attempt. Each retry is persisted as a separate transaction and records the incremented retry count.
 
-## Local Setup
+## Local setup
 
 ### Requirements
 
 - Python **3.13**
-- Git (for version control)
+- Git
 
 ### Windows PowerShell
-
-Create the virtual environment with Python 3.13:
 
 ```powershell
 py -3.13 -m venv venv
@@ -135,19 +152,19 @@ Open:
 
 ## Testing
 
-Run the automated test suite with:
+Run the test suite with:
 
 ```powershell
 python -m pytest -q
 ```
 
-The current suite covers payment execution, idempotency behavior, failure handling, retry tracking, and schedule advancement.
+GitHub Actions runs the same test suite on pushes and pull requests targeting `main`.
 
-## Design Notes
+## Design notes and scope
 
-This project is intentionally a **local simulation/prototype**. It does not connect to a real bank, UPI rail, card network, payment processor, or production payment system.
+This is intentionally a **local simulation/prototype**. It does not connect to a real bank, UPI rail, card network, payment processor, or production payment system.
 
-The payment engine uses deterministic scheduler idempotency keys and a local SQLite database so the behavior can be demonstrated without external services.
+The project uses a local SQLite database and deterministic scheduler idempotency keys so the payment workflow can be demonstrated without external services.
 
 ## License
 
